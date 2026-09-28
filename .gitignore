@@ -1,5 +1,6 @@
 
 # Playwright
+.github/workflows
  .DS_Store
 node_modules/
 /test-results/
