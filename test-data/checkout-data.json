@@ -1,0 +1,18 @@
+{
+  "customer": {
+    "firstName": "Maya",
+    "lastName": "Tester",
+    "address": "123 Right Drive",
+    "telephone": "9817374849",
+    "city": "New Jersey",
+    "postalCode": "07001",
+    "country": "United States",
+    "zone": "New Jersey",
+    "password": "numpy@123"
+  },
+
+  "product": {
+    "category": "Laptops & Notebooks",
+    "name": "HP LP3065"
+  }
+}
