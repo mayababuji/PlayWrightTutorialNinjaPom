@@ -152,6 +152,174 @@ This project uses the Page Object Model (POM) design pattern.
 The screenshot below shows the Playwright HTML test report after the test execution.
 
 ![Playwright Test Report](./screenshots/playwright-report.png)
+
+## Run Playwright Tests in Jenkins
+
+This project can run Playwright tests through a Jenkins Pipeline.
+
+### Prerequisites
+
+Before running the project in Jenkins, make sure Jenkins has:
+
+- The **Pipeline** plugin installed.
+- The **Git** plugin installed.
+- The **NodeJS** plugin installed.
+- A Node.js installation configured in Jenkins.
+
+### Configure Node.js in Jenkins
+
+1. In Jenkins, go to **Manage Jenkins**.
+2. Select **Plugins**.
+3. Search for **NodeJS** and install the **NodeJS Plugin**.
+4. Go to **Manage Jenkins → Tools**.
+5. Find **NodeJS installations** and click **Add NodeJS**.
+6. Set the NodeJS installation name to:
+
+```text
+NodeJS-20
+```
+
+7. Select **Install automatically**.
+8. Choose a Node.js 20 LTS version.
+9. Click **Save**.
+
+The `NodeJS-20` name must exactly match the name used in the `Jenkinsfile`.
+
+### Jenkinsfile
+
+Create a file named `Jenkinsfile` in the root of the project.
+
+```groovy
+pipeline {
+  agent any
+
+  tools {
+    nodejs 'NodeJS-20'
+  }
+
+  stages {
+    stage('Check Node and npm') {
+      steps {
+        sh 'node --version'
+        sh 'npm --version'
+      }
+    }
+
+    stage('Install Dependencies') {
+      steps {
+        sh 'npm ci'
+      }
+    }
+
+    stage('Install Playwright Browsers') {
+      steps {
+        sh 'npx playwright install --with-deps'
+      }
+    }
+
+    stage('Run Playwright Tests') {
+      steps {
+        sh 'npx playwright test'
+      }
+    }
+  }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
+    }
+  }
+}
+```
+
+### Push the Jenkinsfile
+
+Push the Jenkinsfile to your GitHub repository:
+
+```bash
+git add Jenkinsfile
+git commit -m "Add Jenkins Playwright pipeline"
+git push
+```
+
+### Create a Jenkins Pipeline Job
+
+1. Open Jenkins in the browser.
+2. Click **New Item**.
+3. Enter a job name, such as:
+
+```text
+playwright-automation
+```
+
+4. Select **Pipeline**.
+5. Click **OK**.
+6. In the **Pipeline** section, set **Definition** to:
+
+```text
+Pipeline script from SCM
+```
+
+7. Select **Git** as the SCM.
+8. Paste the GitHub repository URL:
+
+```text
+[https://github.com/mayababuji/PlayWrightTutorialNinjaPom.git](https://github.com/mayababuji/PlayWrightTutorialNinjaPom.git)
+```
+
+9. In **Branches to build**, enter:
+
+```text
+*/main
+```
+
+10. In **Script Path**, enter:
+
+```text
+Jenkinsfile
+```
+
+11. Click **Save**.
+
+### Run the Pipeline
+
+1. Open the Jenkins job.
+2. Click **Build Now**.
+3. Open the build number, such as `#1`.
+4. Click **Console Output** to review the pipeline logs.
+5. After the build completes, open **Artifacts** to download:
+   - `playwright-report`
+   - `test-results`
+
+### Pipeline Stages
+
+The Jenkins pipeline performs these steps:
+
+1. Checks that Node.js and npm are available.
+2. Installs dependencies using `npm ci`.
+3. Installs Playwright browsers and required Linux dependencies.
+4. Runs all Playwright tests using `npx playwright test`.
+5. Archives the Playwright report and test-result files.
+## Jenkins Job Test Report Screenshot
+
+The screenshot below shows the Playwright HTML test report after the test execution in Jnekins.
+
+![Playwright Test Report](./screenshots/testResults.png)
+![Playwright Test Report](./screenshots/jenkins-screenshot.png)
+### Common Error
+
+If Jenkins displays this error:
+
+```text
+npm: command not found
+```
+
+Node.js is not configured for the Jenkins job. Install and configure the NodeJS Plugin, then ensure that this name in the Jenkinsfile matches the NodeJS tool name in Jenkins:
+
+```groovy
+nodejs 'NodeJS-20'
+```
 ## Ignored Files
 
 The following files and folders should be included in `.gitignore`:
