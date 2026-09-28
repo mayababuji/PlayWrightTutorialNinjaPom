@@ -1,7 +1,18 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs 'NodeJS-20'
+  }
+
   stages {
+    stage('Check Node and npm') {
+      steps {
+        sh 'node --version'
+        sh 'npm --version'
+      }
+    }
+
     stage('Install Dependencies') {
       steps {
         sh 'npm ci'
