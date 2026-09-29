@@ -34,8 +34,23 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
-      archiveArtifacts artifacts: 'test-results/**', allowEmptyArchive: true
+      // Archive the HTML report.
+      archiveArtifacts(
+        artifacts: 'playwright-report/**',
+        allowEmptyArchive: true
+      )
+
+      // Archive traces, screenshots, videos, and other test results.
+      archiveArtifacts(
+        artifacts: 'test-results/**',
+        allowEmptyArchive: true
+      )
+
+      // Publish JUnit results.
+      junit(
+        testResults: 'test-results/results.xml',
+        allowEmptyResults: true
+      )
     }
   }
 }
