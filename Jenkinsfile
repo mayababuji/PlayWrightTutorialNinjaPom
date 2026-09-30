@@ -27,14 +27,34 @@ pipeline {
 
     stage('Run Playwright Tests') {
       steps {
-        sh 'npx playwright test'
+        script {
+          // Keep the pipeline going so reports can be published
+          // even when one or more tests fail.
+          catchError(
+            buildResult: 'UNSTABLE',
+            stageResult: 'UNSTABLE'
+          ) {
+            sh 'npx playwright test'
+          }
+        }
       }
     }
   }
 
   post {
     always {
-      // Archive the HTML report.
+      // Publish the Allure report from raw Allure results.
+      allure([
+        includeProperties: false,
+        jdk: '',
+        properties: [],
+        reportBuildPolicy: 'ALWAYS',
+        results: [
+          [path: 'allure-results']
+        ]
+      ])
+
+      // Archive the Playwright HTML report.
       archiveArtifacts(
         artifacts: 'playwright-report/**',
         allowEmptyArchive: true
