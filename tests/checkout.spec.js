@@ -1,61 +1,92 @@
 import { test, expect } from '@playwright/test';
+import * as allure from 'allure-js-commons';
+
 import { HomePage } from '../pages/HomePage.js';
 import { ProductPage } from '../pages/ProductPage.js';
 import { CheckOutPage } from '../pages/CheckOutPage.js';
 import { CategoryPage } from '../pages/CategoryPage.js';
-import checkoutData from '../test-data/checkout-data.json' with { type: 'json' };
 
-test('customer can register and place an order', async ({ page }) => {
-  const homePage = new HomePage(page);
-  const productPage = new ProductPage(page);
-  const categoryPage = new CategoryPage(page);
-  const checkoutPage = new CheckOutPage(page);
+import checkoutData from '../test-data/checkout-data.json' with {
+  type: 'json',
+};
 
-  const email = `maya${Date.now()}@email.com`;
+test(
+  'Customer can register and place an order',
+  async ({ page }) => {
+    // Allure labels
+    await allure.epic('E-commerce');
+    await allure.feature('Checkout');
+    await allure.story('Register and place an order');
+    await allure.severity('critical');
+    await allure.owner('QA Team');
+    await allure.tags('regression', 'checkout', 'registration', 'order');
 
-  // Add a product to the cart.
-  await homePage.open();
+    const homePage = new HomePage(page);
+    const productPage = new ProductPage(page);
+    const categoryPage = new CategoryPage(page);
+    const checkoutPage = new CheckOutPage(page);
 
-  await categoryPage.openLaptopsAndNotebooks();
+    const email = `maya${Date.now()}@email.com`;
 
-  await homePage.openProduct('HP LP3065');
+    await test.step('Add an HP LP3065 product to the cart', async () => {
+      await homePage.open();
 
-  await productPage.addToCart();
+      await categoryPage.openLaptopsAndNotebooks();
 
-  await expect(productPage.successAlert).toContainText(
-    'Success: You have added'
-  );
+      await homePage.openProduct('HP LP3065');
 
-  await expect(productPage.successAlert).toContainText('HP LP3065');
+      await productPage.addToCart();
+    });
 
-  // Begin checkout and choose registration.
-  await homePage.openCart();
+    await test.step('Verify the product was added to the cart', async () => {
+      await expect(productPage.successAlert).toContainText(
+        'Success: You have added'
+      );
 
-  await checkoutPage.clickOnCheckout();
+      await expect(productPage.successAlert).toContainText('HP LP3065');
+    });
 
-  await checkoutPage.selectRegisterAccount();
+    await test.step('Start checkout and select account registration', async () => {
+      await homePage.openCart();
 
-  await checkoutPage.continueFromCheckoutOptions();
+      await checkoutPage.clickOnCheckout();
 
-  // Register a unique account.
- await checkoutPage.completeRegistration({
-  ...checkoutData.customer,
-  email
-});
+      await checkoutPage.selectRegisterAccount();
 
-  // Complete checkout.
-  await checkoutPage.continueFromShippingAddress();
+      await checkoutPage.continueFromCheckoutOptions();
+    });
 
-  await checkoutPage.continueFromShippingMethod();
+    await test.step('Register a unique customer account', async () => {
+      await checkoutPage.completeRegistration({
+        ...checkoutData.customer,
+        email,
+      });
+    });
 
-  await checkoutPage.continueFromPaymentMethod();
+    await test.step('Complete the shipping address step', async () => {
+      await checkoutPage.continueFromShippingAddress();
+    });
 
-  await checkoutPage.confirmOrder();
+    await test.step('Complete the shipping method step', async () => {
+      await checkoutPage.continueFromShippingMethod();
+    });
 
-  // Verify successful order.
-  await expect(checkoutPage.confirmationMessage).toBeVisible();
+    await test.step('Complete the payment method step', async () => {
+      await checkoutPage.continueFromPaymentMethod();
+    });
 
-  await checkoutPage.continueToHomePage();
+    await test.step('Confirm the order', async () => {
+      await checkoutPage.confirmOrder();
+    });
 
-  await expect(homePage.homePageHeading).toBeVisible();
-});
+    await test.step('Verify the order confirmation', async () => {
+      await expect(checkoutPage.confirmationMessage).toBeVisible();
+    });
+
+    await test.step('Return to the home page', async () => {
+      await checkoutPage.continueToHomePage();
+
+      await expect(homePage.homePageHeading).toBeVisible();
+    });
+  }
+);

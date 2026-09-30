@@ -26,8 +26,18 @@ export default defineConfig({
       {
         outputFile: 'test-results/results.xml'
       }
-    ]
+    ],
+     // Allure report results
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results',
+        detail: true,
+        suiteTitle: true,
+      },
+    ],
   ],
+  
 
   use: {
     baseURL: 'https://tutorialsninja.com/demo/',
