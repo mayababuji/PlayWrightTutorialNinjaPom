@@ -304,8 +304,11 @@ The Jenkins pipeline performs these steps:
 ## Jenkins Job Test Report Screenshot
 
 The screenshot below shows the Playwright HTML test report after the test execution in Jenkins with allure report integrated.
+![Playwright Test Report](./screenshots/jenkins-screenshot.png)
 
 ![Playwright Test Report](./screenshots/testResults.png)
+
+
 ![Playwright Test Report](./screenshots/allure-results.png)
 ### Common Error
 
